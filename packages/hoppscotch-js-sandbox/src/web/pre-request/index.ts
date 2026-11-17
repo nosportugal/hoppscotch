@@ -11,29 +11,11 @@ import {
 import { defaultModules, preRequestModule } from "~/cage-modules"
 import { acquireCage, resetCage, isInfraError } from "~/utils/cage"
 
-import { Cookie, HoppRESTRequest } from "@hoppscotch/data"
-import Worker from "./worker?worker&inline"
-
-const runPreRequestScriptWithWebWorker = (
-  preRequestScript: string,
-  envs: TestResult["envs"]
-): Promise<E.Either<string, SandboxPreRequestResult>> => {
-  return new Promise((resolve) => {
-    const worker = new Worker()
-
-    // Listen for the results from the web worker
-    worker.addEventListener("message", (event: MessageEvent) => {
-      worker.terminate()
-      return resolve(event.data.results)
-    })
-
-    // Send the script to the web worker
-    worker.postMessage({
-      preRequestScript,
-      envs,
-    })
-  })
-}
+import {
+  Cookie,
+  getDefaultRESTRequest,
+  HoppRESTRequest,
+} from "@hoppscotch/data"
 
 /**
  * Runs a pre-request script on the given cage instance.
@@ -199,5 +181,15 @@ export const runPreRequestScript = (
     )
   }
 
-  return runPreRequestScriptWithWebWorker(preRequestScript, envs)
+  const { request } = options as Extract<
+    RunPreRequestScriptOptions,
+    { experimentalScriptingSandbox?: false }
+  >
+
+  return runPreRequestScriptWithFaradayCage(
+    preRequestScript,
+    envs,
+    request ?? getDefaultRESTRequest(),
+    null
+  )
 }

@@ -198,6 +198,7 @@ export type RunPreRequestScriptOptions =
     }
   | {
       envs: TestResult["envs"]
+      request?: HoppRESTRequest
       experimentalScriptingSandbox?: false
     }
 
@@ -213,6 +214,7 @@ export type RunPostRequestScriptOptions =
   | {
       envs: TestResult["envs"]
       response: TestResponse
+      request?: HoppRESTRequest
       experimentalScriptingSandbox?: false
     }
 

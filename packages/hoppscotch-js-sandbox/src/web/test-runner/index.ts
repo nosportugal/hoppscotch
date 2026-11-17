@@ -15,30 +15,11 @@ import { acquireCage, resetCage, isInfraError } from "~/utils/cage"
 import { parseScriptForSyntax } from "~/utils/scripting"
 import { preventCyclicObjects } from "~/utils/shared"
 
-import { Cookie, HoppRESTRequest } from "@hoppscotch/data"
-import Worker from "./worker?worker&inline"
-
-const runPostRequestScriptWithWebWorker = (
-  testScript: string,
-  envs: TestResult["envs"],
-  response: TestResponse
-): Promise<E.Either<string, SandboxTestResult>> => {
-  return new Promise((resolve) => {
-    const worker = new Worker()
-
-    // Listen for the results from the web worker
-    worker.addEventListener("message", (event: MessageEvent) =>
-      resolve(event.data.results)
-    )
-
-    // Send the script to the web worker
-    worker.postMessage({
-      testScript,
-      envs,
-      response,
-    })
-  })
-}
+import {
+  Cookie,
+  getDefaultRESTRequest,
+  HoppRESTRequest,
+} from "@hoppscotch/data"
 
 /**
  * Runs a post-request/test script on the given cage instance.
@@ -251,5 +232,16 @@ export const runTestScript = async (
     )
   }
 
-  return runPostRequestScriptWithWebWorker(testScript, envs, resolvedResponse)
+  const { request } = options as Extract<
+    RunPostRequestScriptOptions,
+    { experimentalScriptingSandbox?: false }
+  >
+
+  return runPostRequestScriptWithFaradayCage(
+    testScript,
+    envs,
+    request ?? getDefaultRESTRequest(),
+    resolvedResponse,
+    null
+  )
 }
