@@ -402,6 +402,7 @@ export const delegatePreRequestScriptRunner = (
   if (!experimentalScriptingSandbox) {
     return runPreRequestScript(combinedScript, {
       envs,
+      request,
       experimentalScriptingSandbox: false,
     })
   }
@@ -449,6 +450,7 @@ export const runPostRequestScript = (
   if (!experimentalScriptingSandbox) {
     return runTestScript(combinedScript, {
       envs,
+      request,
       response,
       experimentalScriptingSandbox: false,
     })
